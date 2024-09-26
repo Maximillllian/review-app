@@ -2,7 +2,7 @@ name: Deploy to server
 on:
   push:
     branches:
-      - step-1-initial-cicd
+      - main
 
 jobs:
   build:
@@ -46,6 +46,10 @@ jobs:
           sshpass -p ${{ env.PSWD }} ssh -v -o StrictHostKeyChecking=no ${{ env.USER }}@${{ env.HOST }} <<'ENDSSH'
           docker pull ${{ env.DOCKER_IMAGE }}
           docker stop ${{ env.APP_NAME }}
-          docker system prune -f
-          docker run --name ${{ env.APP_NAME }} -dit -p 80:${{ env.NGINX_PORT }} ${{ env.DOCKER_IMAGE }}
+          docker rm ${{ env.APP_NAME }}
+          docker run --name ${{ env.APP_NAME }} \
+            -e VIRTUAL_HOST=${{ env.ARTIFACT_HOST }} \
+            -e VIRTUAL_PORT=8080 \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            -dit ${{ env.DOCKER_IMAGE }}
           ENDSSH
