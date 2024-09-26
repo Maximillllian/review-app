@@ -2,7 +2,7 @@
 </script>
 
 <template>
-  <h1>Hello, step2-review-apps branch!</h1>
+  <h1>Hello, master branch!</h1>
 </template>
 
 <style scoped>
