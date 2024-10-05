@@ -8,6 +8,7 @@ jobs:
     uses: ./.github/workflows/reusable_deploy.yaml
     with:
       container_name: black-lotos-prod
+      branch_name: ${{ github.ref_name }}
     secrets: 
         HOST_ADDRESS: ${{ secrets.ARTIFACT_HOST }},www.${{ secrets.ARTIFACT_HOST }}
         USER: ${{ secrets.USER }}
