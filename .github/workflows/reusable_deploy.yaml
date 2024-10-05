@@ -6,6 +6,9 @@ on:
             container_name:
                 required: true
                 type: string
+            branch_name:
+                required: true
+                type: string
         secrets:
             PSWD:
                 required: true
@@ -36,6 +39,8 @@ jobs:
         steps:
           - name: Checkout repository
             uses: actions/checkout@v4
+            with:
+                ref: ${{ inputs.branch_name }}
           - name: Set up QEMU
             uses: docker/setup-qemu-action@v2
           - name: Set up Docker Buildx
