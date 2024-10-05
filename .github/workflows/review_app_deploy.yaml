@@ -1,20 +1,75 @@
 name: Manually deploy
 on:
-    push:
-        branches:
-            - step3-reusable-workflows
-    workflow_dispatch:
+    issue_comment:
+        types: [created]
 
 jobs:
-  deploy:
-    uses: ./.github/workflows/reusable_deploy.yaml
-    with:
-      container_name: review-app-${{ github.ref_name }}
-    secrets: 
-        HOST_ADDRESS: ${{ github.ref_name }}.${{ secrets.ARTIFACT_HOST }},www.${{ github.ref_name }}.${{ secrets.ARTIFACT_HOST }}
-        USER: ${{ secrets.USER }}
-        PSWD: ${{ secrets.PSWD }}
-        HOST: ${{ secrets.HOST }}
-        ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
-        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-        DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}       
+    check_need_deploy:
+        runs-on: ubuntu-latest
+        outputs:
+            triggered: ${{ steps.check.outputs.triggered }}
+        steps:
+            - uses: shanegenschaw/pull-request-comment-trigger@v2.1.0
+              id: check
+              with:
+                  trigger: '/deploy'
+                  reaction: rocket
+              env:
+                  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+    get_branch_name:
+        needs: check_need_deploy
+        if: needs.check_need_deploy.outputs.triggered == 'true'
+
+        runs-on: ubuntu-latest
+        outputs:
+            ref_name: ${{ fromJson(steps.get_pull_request_ref.outputs.data).head.ref }}
+        steps:
+            - name: get pull request ref
+              id: get_pull_request_ref
+              uses: octokit/request-action@v2.x
+              with:
+                  route: GET /repos/:repository/pulls/:issue_id
+                  repository: ${{ github.repository }}
+                  issue_id: ${{ github.event.issue.number }}
+              env:
+                  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+    variables:
+        runs-on: ubuntu-latest
+        needs: get_branch_name
+
+        outputs:
+            container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
+            host_address: ${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+        steps:
+            - name: pass
+              run: echo "great!"
+    deploy:
+        needs: [get_branch_name, variables]
+
+        uses: ./.github/workflows/reusable_deploy.yaml
+        with:
+            container_name: ${{ needs.variables.outputs.container_name }}
+            branch_name: ${{ needs.get_branch_name.outputs.ref_name }}
+        secrets:
+            HOST_ADDRESS: ${{ needs.variables.outputs.host_address }},www.${{ needs.variables.outputs.host_address }}
+            USER: ${{ secrets.USER }}
+            PSWD: ${{ secrets.PSWD }}
+            HOST: ${{ secrets.HOST }}
+            ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    kill:
+        needs: [deploy, variables]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: kill_app
+              env:
+                  KILL_AFTER: '90m'
+                  CONTAINER_NAME: ${{ needs.variables.outputs.container_name }}
+              run: |
+                  sleep ${{ env.KILL_AFTER }}
+                  sshpass -p ${{ secrets.PSWD }} ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
+                  docker stop ${{ secrets.CONTAINER_NAME }}
+                  docker rm ${{ env.CONTAINER_NAME }}
+                  ENDSSH
