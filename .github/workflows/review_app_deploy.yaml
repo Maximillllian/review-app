@@ -38,10 +38,10 @@ jobs:
 
         uses: ./.github/workflows/reusable_deploy.yaml
         with:
-            container_name: review-app-${{ github.ref_name }}
-            branch_name: ${{ needs.variables.get_branch_name.branch_name }}
+            container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
+            branch_name: ${{ needs.get_branch_name.outputs.ref_name }}
         secrets:
-            HOST_ADDRESS: ${{ github.ref_name }}.${{ secrets.ARTIFACT_HOST }},www.${{ github.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+            HOST_ADDRESS: ${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }},www.${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }}
             USER: ${{ secrets.USER }}
             PSWD: ${{ secrets.PSWD }}
             HOST: ${{ secrets.HOST }}
