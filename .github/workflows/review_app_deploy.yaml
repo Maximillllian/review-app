@@ -2,6 +2,8 @@ name: Manually deploy
 on:
     issue_comment:
         types: [created]
+    issue_comment:
+        types: [created]
 
 jobs:
     check_need_deploy:
