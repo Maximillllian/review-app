@@ -35,6 +35,7 @@ jobs:
           HOST: ${{ secrets.HOST }}
           ARTIFACT_HOST: ${{ secrets.HOST_ADDRESS }}
           ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
+          DOCKER_REPO: maximillllian/review-app
           DOCKER_IMAGE: maximillllian/review-app:${{ github.sha }}
         steps:
           - name: Checkout repository
@@ -45,7 +46,7 @@ jobs:
             uses: Abhishek-070/Dockerhub-Build-Push@v1.0
             with:
                 registry_url: 'docker.io'
-                repository_name: ${{ env.DOCKER_IMAGE }}
+                repository_name: ${{ env.DOCKER_REPO }}
                 user_name: ${{ secrets.DOCKERHUB_USERNAME }}
                 password: ${{ secrets.DOCKERHUB_TOKEN }}
                 image_version: ${{ github.sha }}
