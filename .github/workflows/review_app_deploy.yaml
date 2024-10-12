@@ -33,18 +33,43 @@ jobs:
                   issue_id: ${{ github.event.issue.number }}
               env:
                   GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-    deploy:
+    variables:
+        runs-on: ubuntu-latest
         needs: get_branch_name
+
+        outputs:
+            container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
+            host_address: ${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+        steps:
+            - name: pass
+              run: echo "great!"
+    deploy:
+        needs: [get_branch_name, variables]
 
         uses: ./.github/workflows/reusable_deploy.yaml
         with:
-            container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
+            container_name: ${{ needs.variables.outputs.container_name }}
             branch_name: ${{ needs.get_branch_name.outputs.ref_name }}
         secrets:
-            HOST_ADDRESS: ${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }},www.${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+            HOST_ADDRESS: ${{ needs.variables.outputs.host_address }},www.${{ needs.variables.outputs.host_address }}
             USER: ${{ secrets.USER }}
             PSWD: ${{ secrets.PSWD }}
             HOST: ${{ secrets.HOST }}
             ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
             DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    kill:
+        needs: [get_branch_name, variables]
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: kill_app
+              env:
+                  KILL_AFTER: '90m'
+                  CONTAINER_NAME: ${{ needs.variables.outputs.container_name }}
+              run: |
+                  sleep ${{ env.KILL_AFTER }}
+                  sshpass -p ${{ secrets.PSWD }} ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
+                  docker stop ${{ secrets.CONTAINER_NAME }}
+                  docker rm ${{ env.CONTAINER_NAME }}
+                  ENDSSH
