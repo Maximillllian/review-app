@@ -58,6 +58,23 @@ jobs:
             ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
             DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    comment:
+        needs: [deploy, variables]
+
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/github-script@v6
+              env:
+                  HOST_ADDRESS: ${{ needs.variables.outputs.host_address }}
+              with:
+                  script: |
+                      const { HOST_ADDRESS } = process.env 
+                      github.rest.issues.createComment({
+                      issue_number: context.issue.number,
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      body: `Review app successfully deployed [${HOST_ADDRESS}](http://${HOST_ADDRESS})`
+                      })
     kill:
         needs: [deploy, variables]
         runs-on: ubuntu-latest
