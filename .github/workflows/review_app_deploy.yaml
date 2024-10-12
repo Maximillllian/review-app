@@ -16,7 +16,7 @@ jobs:
             ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
             DOCKER_IMAGE: maximillllian/review-app:${{ github.sha }}
             BRANCH_NAME: ${{ github.ref_name }}
-            HOST_ADDRESS: ${{ github.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+            HOST_ADDRESS: ${{ github.ref_name }}.${{ vars.HOST_ADDRESS }}
         steps:
             - name: Checkout repository
               uses: actions/checkout@v4
