@@ -87,6 +87,6 @@ jobs:
               run: |
                   sleep ${{ env.KILL_AFTER }}
                   sshpass -p ${{ secrets.PSWD }} ssh -v -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} <<'ENDSSH'
-                  docker stop ${{ secrets.CONTAINER_NAME }}
+                  docker stop ${{ env.CONTAINER_NAME }}
                   docker rm ${{ env.CONTAINER_NAME }}
                   ENDSSH
