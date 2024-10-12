@@ -2,7 +2,7 @@ name: Deploy to server
 on:
   push:
     branches:
-      - main
+      - step-1-initial-cicd
 
 jobs:
   build:
@@ -12,7 +12,7 @@ jobs:
       PSWD: ${{ secrets.PSWD }}
       USER: ${{ secrets.USER }}
       HOST: ${{ secrets.HOST }}
-      ARTIFACT_HOST: ${{ secrets.ARTIFACT_HOST }}
+      ARTIFACT_HOST: ${{ vars.HOST_ADDRESS }}
       NGINX_PORT: 8080
       ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
       DOCKER_IMAGE: maximillllian/review-app:${{ github.sha }}
