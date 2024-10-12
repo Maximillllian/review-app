@@ -37,9 +37,6 @@ jobs:
         runs-on: ubuntu-latest
         needs: get_branch_name
 
-        env:
-            ARTIFACT_HOST: ${{ secrets.ARTIFACT_HOST }}
-
         outputs:
             container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
             host_address: ${{ needs.get_branch_name.outputs.ref_name }}.${{ vars.HOST_ADDRESS }}
@@ -53,8 +50,8 @@ jobs:
         with:
             container_name: ${{ needs.variables.outputs.container_name }}
             branch_name: ${{ needs.get_branch_name.outputs.ref_name }}
+            host_address: ${{ needs.variables.outputs.host_address }},www.${{ needs.variables.outputs.host_address }}
         secrets:
-            HOST_ADDRESS: ${{ needs.variables.outputs.host_address }},www.${{ needs.variables.outputs.host_address }}
             USER: ${{ secrets.USER }}
             PSWD: ${{ secrets.PSWD }}
             HOST: ${{ secrets.HOST }}

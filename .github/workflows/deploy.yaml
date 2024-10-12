@@ -9,8 +9,8 @@ jobs:
     with:
       container_name: black-lotos-prod
       branch_name: ${{ github.ref_name }}
+      host_address: ${{ vars.HOST_ADDRESS }},www.${{ vars.HOST_ADDRESS }}
     secrets: 
-        HOST_ADDRESS: ${{ secrets.ARTIFACT_HOST }},www.${{ secrets.ARTIFACT_HOST }}
         USER: ${{ secrets.USER }}
         PSWD: ${{ secrets.PSWD }}
         HOST: ${{ secrets.HOST }}

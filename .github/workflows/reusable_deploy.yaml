@@ -9,14 +9,15 @@ on:
             branch_name:
                 required: true
                 type: string
+            host_address:
+                required: true
+                type: string
         secrets:
             PSWD:
                 required: true
             USER:
                 required: true
             HOST:
-                required: true
-            HOST_ADDRESS:
                 required: true
             ARTIFACT_SSH_KEY:
                 required: true
@@ -33,7 +34,7 @@ jobs:
           PSWD: ${{ secrets.PSWD }}
           USER: ${{ secrets.USER }}
           HOST: ${{ secrets.HOST }}
-          ARTIFACT_HOST: ${{ secrets.HOST_ADDRESS }}
+          ARTIFACT_HOST: ${{ inputs.host_address }}
           ARTIFACT_SSH_KEY: ${{ secrets.ARTIFACT_SSH_KEY }}
           DOCKER_REPO: maximillllian/review-app
           DOCKER_IMAGE: maximillllian/review-app:${{ github.sha }}
