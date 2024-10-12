@@ -59,7 +59,7 @@ jobs:
             DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
             DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
     kill:
-        needs: [get_branch_name, variables]
+        needs: [deploy, variables]
         runs-on: ubuntu-latest
 
         steps:
