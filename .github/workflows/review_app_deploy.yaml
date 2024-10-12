@@ -37,9 +37,12 @@ jobs:
         runs-on: ubuntu-latest
         needs: get_branch_name
 
+        env:
+            ARTIFACT_HOST: ${{ secrets.ARTIFACT_HOST }}
+
         outputs:
             container_name: review-app-${{ needs.get_branch_name.outputs.ref_name }}
-            host_address: ${{ needs.get_branch_name.outputs.ref_name }}.${{ secrets.ARTIFACT_HOST }}
+            host_address: ${{ needs.get_branch_name.outputs.ref_name }}.${{ env.ARTIFACT_HOST }}
         steps:
             - name: pass
               run: echo "great!"
